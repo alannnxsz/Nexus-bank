@@ -1,0 +1,1 @@
+{"name":"nexus-bank","version":"1.0.0","private":true,"description":"Banco fictício Nexus","engines":{"node":">=18"},"scripts":{"local":"IP_LIMIT=0 node local/server.js"}}
