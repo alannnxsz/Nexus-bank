@@ -131,6 +131,8 @@ td input{width:96px;padding:8px 10px;font-size:14px}
 .qa{display:flex;gap:8px;flex-wrap:wrap}
 .qa button{padding:7px 14px;border-radius:99px;border:1px solid var(--ln);background:#ffffff08;font-size:13px;color:var(--p2)}
 .mg{display:block;font-size:12px;color:var(--p2);font-style:italic}
+.aviso{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.45;color:#fcd34d;background:#fbbf2414;border:1px solid #fbbf2433;border-radius:12px;padding:10px 12px}
+.aviso svg{margin-top:1px}
 </style>
 </head>
 <body>
@@ -219,7 +221,7 @@ function loginV(){const reg=S.mode==='reg';
 app.innerHTML=`<div class="login"><section class="hero fade"><div class="logo">${logoSvg}NEXUS</div><h1>O banco que acompanha o seu ritmo.</h1><p class="mu">Cartão Black, investimentos e Pix em um só lugar.</p>
 <div class="chips"><span>${ic('shield')}Seguro</span><span>${ic('trend')}Investimentos</span><span>${ic('card')}Cartão Black</span></div>${cardH({card:'378282246310005',exp:'12/31',since:2026},'Nexus Member')}</section>
 <form class="panel fm fade" id="f" style="animation-delay:.15s"><div class="seg"><button type="button" data-a="mode" data-k="login" class="${reg?'':'on'}">Entrar</button><button type="button" data-a="mode" data-k="reg" class="${reg?'on':''}">Criar conta</button></div>
-<label>Usuário<input id="u" autocomplete="username" autocapitalize="none" required placeholder="seu.usuario"></label><label>Senha<input id="p" type="password" autocomplete="${reg?'new':'current'}-password" required placeholder="••••••"></label><div class="err" id="e"></div><button class="btn">${reg?'Abrir minha conta':'Entrar'}</button></form></div>`;
+<label>Usuário<input id="u" autocomplete="username" autocapitalize="none" required placeholder="seu.usuario"></label><label>Senha<input id="p" type="password" autocomplete="${reg?'new':'current'}-password" required placeholder="••••••"></label><div class="err" id="e"></div><button class="btn">${reg?'Abrir minha conta':'Entrar'}</button><div class="aviso">${ic('shield',16)}<span>Banco de demonstração: todo o dinheiro é <b>fictício</b>. Não use senhas reais.</span></div></form></div>`;
 $('#f').onsubmit=async e=>{e.preventDefault();try{const r=await api('POST',reg?'register':'login',{user:$('#u').value,pass:$('#p').value});S.tab='home';S.hide=false;await enter();if(r.isNew)toast('Conta criada! R$ 100,00 de boas-vindas')}catch(x){$('#e').textContent=x.message}};tilt()}
 function shellV(){const u=S.me.u;
 const nav=NAV.map(([k,l,i])=>`<button class="ni ${S.tab===k?'on':''}" data-a="tab" data-k="${k}">${ic(i)}<span>${l}</span></button>`).join('');
@@ -227,11 +229,11 @@ app.innerHTML=`<div class="shell"><aside class="side"><div class="logo">${logoSv
 tilt();const b=$('#bal');if(b)count(b,u.bal);if(S.tab==='invest'){live();S.tick=setInterval(live,1000)}if(S.tab==='pix')bindPix()}
 function bindPix(){const p=S.pix;let t;
 if($('#to')){const chk=()=>{const v=$('#to').value.trim().toLowerCase().replace(/^@/,'');p.to=v;p.ok=0;const l=$('#lk');if(v.length<3){l.textContent='';return}
-clearTimeout(t);t=setTimeout(async()=>{try{await api('GET','lookup?u='+encodeURIComponent(v));if($('#to')&&p.to===v){p.ok=1;l.innerHTML='<span class="pos">✓ @'+esc(v)+' encontrado</span>'}}catch(e){if(p.to===v)l.innerHTML='<span class="neg">'+esc(e.message)+'</span>'}},350)};
+clearTimeout(t);t=setTimeout(async()=>{try{await api('POST','lookup',{u:v});if($('#to')&&p.to===v){p.ok=1;l.innerHTML='<span class="pos">✓ @'+esc(v)+' encontrado</span>'}}catch(e){if(p.to===v)l.innerHTML='<span class="neg">'+esc(e.message)+'</span>'}},350)};
 $('#to').oninput=chk;if(p.to)chk();$('#amt').oninput=e=>p.a=e.target.value;$('#msg').oninput=e=>p.msg=e.target.value;
 $('#pf').onsubmit=async e=>{e.preventDefault();const v=parse(p.a),u=S.me.u;p.to=$('#to').value.trim().toLowerCase().replace(/^@/,'');
 try{if(!(v>=.01))throw Error('Informe um valor válido.');if(v>u.bal)throw Error('Saldo insuficiente.');if(v>5000)throw Error('Limite por transferência: R$ 5.000,00.');
-await api('GET','lookup?u='+encodeURIComponent(p.to));p.v=v;p.step='review';render()}catch(x){$('#e').textContent=x.message}}}
+await api('POST','lookup',{u:p.to});p.v=v;p.step='review';render()}catch(x){$('#e').textContent=x.message}}}
 if($('#cf'))$('#cf').onsubmit=async e=>{e.preventDefault();try{p.rec=await api('POST','transfer',{to:p.to,amount:p.v,msg:p.msg,password:$('#pw').value});p.step='done';await load();render()}catch(x){$('#e').textContent=x.message}}}
 function live(){const u=S.me&&S.me.u;if(!u||!$('#icur'))return;let c=0,a=0;
 u.inv.forEach(i=>{const v=invValue(i);c+=v;a+=i.a;const e=$('#v-'+i.id);if(e){e.textContent=brl(v);e.className=v>=i.a?'pos':'neg';$('#p-'+i.id).textContent=((v/i.a-1)*100).toFixed(2)+'%'}});
